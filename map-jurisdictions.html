@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coverage — AXIOMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #04070D; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+// Land mask: 240x112 cells on a 1.5° grid, derived from Natural Earth 1:110m.
+// Precomputed so the page needs no map library and no atlas download.
+const BM = "wADw//////////////////////////////////8HAAD4//////////H//////////////////////z8AAADg////////A0AA/v///////////////////wcAACDg//////8fAIAP4P///////////////////w8AAID///////9/AAAC/v///////////////////z8AAACA////////AwAAwP///////////////////z8AAAAA8P//zP//PwAAAOD//////////////////38AAAAAAJAAcP4Y/wAAAMD///////////////////8BAAAAAAAAcACA9wAAAAD+//////8///////////8HAAAAAAAAAAAAfgAAAAAAYH7+//8//v///////w8AAAAAAAAAAAAAOgAAAAAAAACA8P9/4P///////wAAAAAAAAAAAAAAGAAAAAAAAAAAAP4BgP//////AwAAAAAAAAAAAAAAYAAAAAAAAAAAADAAAAAgEAAEAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADABwAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAADAHwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADADwAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAACAHwAAAAAAAAAAAAAAAAAAAAAAAAAHAAAAAAAAAAAAHwAAAAAAAAAAAAAAAAAAAAAABAAMAAAAAAAAAACAHwAAAAAAAAAAAAAAAAAAAAAABgAYAAAAAAAAAACAfwAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAfwAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAACA/wMAAAAAAAAAAAAAAAAAAADADwAgAAAAAAAAAAAA/wMAAAAAAAAAAAAAAAAAAADgHwAQAAAAAAAAAAAA/wsAAAAAACAAAAAAAAAAwADwHwAAAAAAAAAAAAAA/h8AAAAAAOAHAAAAAAAAwAf8PwAAAAAAAAAAAAAA/j8AAAAAAOAPAAAAAAAAwP//PwAAAAAAAAAAAAAA/n8AAAAAAPAfAAAAAAAA4P//fwAAAAAAAAAAAAAA/v8AAAAAAPg/AAAAAAAA4P//fwAAAAAAAAAAAAAA/v8AAAAAAPg/AAAAAAAA8P//fwAAAAAAAAAAAAAA/v8AAAAAAPw/AAAAAAAA4P//PwAAAAAAAAAAAAAA/P8DAAAAAPz/wAAAAAAA8P//PwAAAAAAAAAAAAAA/P8fAAAAAPz/4AAAAAAA8P//HwAAAAAAAAAAAAAA/P8fAAAAAP7/wAEAAAAAwP//D0AAAAAAAAAAAAAA/P8/AAAAAP7/wAEAAAAAAP7/BwAAAAAAAAAAAAAA/v8/AAAAAP//wQEAAAAAAPz/AwCAAQAAAAAAAAAA//8/AAAAAP//xwMAAAAAAPyPAwAAAAAAAAAAAADA//9/AAAAAP7/DwMAAAAAAPCHAQAAAAAAAAAAAADA//9/AAAAAP7/DwIAAAAAAICHAAAAAAAAAAAAAADg//9/AAAAAPz/BwAAAAAAAACKAAAAAAAAAAAAAADw////AAAAAP7/BwAAAAAAAAAAEBAAAAAAAAAAAADw////AQAAAP7/BwAAAAAAQBDADAAAAAAAAAAAAAD4////AQAAAP7/BwAAAAAADwDgBwAAAAAAAAAAAAD8////AQAAAP7/AwAAAACAAADgFwAAAAAAAAAAAAD8//9/AAAAAP//BwAAAABgAAX4QQAAAAAAAAAAAAD4//8/AAAAgP//BwAAAABwPEN6IAAAAAAAAAAAAAD4//8DAAAAgP//DwAAAAAwPAMDAAAAAAAAAAAAAAD4/38AAAAAgP//HwAAAAA4fgEAAAAAAAAAAAAAAADw/38AAAAAgP//PwAAAAA8fgAAAAAAAAAAAAAAAADg/38AAAAAgP///wAAAAAWeAAAAAAAAAAAAAAAAADg/z8AAAAI8P///wAAAAAT4AAAAAAAAAAAAAAAAADg/wMAAAD+8f///wEAAAAYQAAAAAAAAAAAAAAAAADw/wEAAAD//////wMAQAAAABwAAAAAAAAAAAAAAADa/wAAAAD//////wMAUABEABAAAAAAAAAAAAAAAIDBzwAAAID//////wMAOADEAAQAAAAAAAAAAAAAAIABAQAAAMD/////HwQAOADkAQAAAAAAAAAAAAAAAOABAAAAAOD//////wAAPAD8AQQAAAAAAAAAAAAAAPgBAAAAAOD/////5wMAPAD8AQIAAAAAAAAAAAAAgD8AAAAAAOD/////5w8AfoD/AAIAAAAAAAAAAAAA8D8gEAAAAMD/////8z8A/oB/AAIAAAAAAAAAAAAA/DAAAwAAAMD/////8X8A/oF/AgAAAAAAAAAAAAAA/HAwAAAAAOD/////+f+A/sf/AAAAAAAAAAAAAAAAfAANAAAAAMD/////+f+A/9//HwAAAAAAAAAAAAAAfgAAAAAAAMD//////H/g////fwIAAAAAAAAAAAAA/wAEAAAAAID//////gf//////wAAAAAAAAAAAACw/wAEAAAAAID///9///P//////wEAAAAAAAAAAADQ/wAGAAAAAAD+//8///n//////wMAAAAAAAAAAADo/58CAAAAAAD8//////3//////wMAAAAAAAAAAADo//8DAAAAAAD8/8cD/////////4MAAAAAAAAAAAD8//8PAAAAAAD4/wAA/////////4EAAAAAAAAAAAD///8fAAAAAADwfwAA/////////wALAAAAAAAAAID///8/AAAAAAAA/gAA/v///////2E4AAAAAAAAAID///8/AAAAAAD4AIb4//P//////2IgAAAAAAAAAMD///8/AAAAAAD8AMj8//H/////fzBAAAAAAAAAAMD///9/AAAAAAD4Qfzw//P//////31AAAAAAAAAAMD/////AQAAAAD8R+eH8Pn//////39AAAAAAAAAAMD/////AwAAAACYn/sH+Pj///////+DAQAAAAAAAMD/////bwAAAAAA//2P/vj///////+PAAAAAAAAAMD/////HwAAAACA///f/PP///////+fAAAAAAAAAKD/////Hx4AAADA//////////////+/AAAAAAAAAND/////TwQAAACA//////////////+/AQAAAAAAAPj//////wUAAADg/f////////////+/AAAAAAAAAPj////z/wcAAADM+///////////////AAIAAAAAAP3////z/wMAAACMwP////////////+vAAcAABAAAP7//3/g/wAAAABgQIP///////////8HAA8AAIACAP///x/g/wAAAABwQIb///////////8fAB4AAEAD4P///wPwdwAAAAAgMA////////////9/ABwAAPo//P///wHgIwAAAAAA8B/x//////////////AAAPz//////wPgAQAPAAAA8I///////////////9kPgPj//////w8AFoAPAAAA4J//////////////////EOT//////7/zH8AfAHwAAH///v////////////9/f/7//////3+Ad+D/AHoAAP7/8P//////////////B/j//////74jP+D/AwAAAPz/T/7//f//////////APj/3//jCY3jB8D/fwAAAPD/AQDO/f/////////9AOAfAADgD+f/B/D/fwAAAAAfAADg/f///////wcAAAAAAOD+5vB/APD//wEAAAAAADjAvf///z/gDwAAAAAAAMAH5m4aAPj//wcAAAAAAGAAwP///xjAAAAAAAAAAADgQ/sHAPz//wcAAAAAAMABAPz/DwDwHQAAAAAAAICDYO8P/P///wMAAAAAAAAwAADwBwAAAAAAAAAAAABgoIAf/////wcAAJ4AAAAAAAAAAAAAAAAAAAAAAAAAAP5/4P///w8AAJ8BAAAAAIAHAAAAAAAAAAAAAAAAAOT/7////38AAAAAAAAAAIABAAAAAAAAAAAAAAAAAID/fwD+/wMAAAAAAAAAAAAAAAAAAAAA";
+const COLS = 240, ROWS = 112, L0 = -180, P0 = -84, STEP = 1.5;
+
+const SITES = [
+  { name: "ARUBA",        code: "AW", lon: -69.9683, lat: 12.5211, off: 0 },
+  { name: "CURAÇAO",      code: "CW", lon: -68.9900, lat: 12.1696, off: 34 },
+  { name: "SINT MAARTEN", code: "SX", lon: -63.0548, lat: 18.0425, off: 68 },
+  { name: "SURINAME",     code: "SR", lon: -55.2038, lat:  5.8520, off: 102 }
+];
+
+const HUBS = [
+  [-69.97, 12.52], [-55.20, 5.85], [-63.05, 18.04], [-3.70, 40.42],
+  [-74.01, 40.71], [4.90, 52.37], [-46.63, -23.55], [55.27, 25.20],
+  [103.82, 1.35], [-99.13, 19.43]
+];
+
+const DOT = "#7FB6FF", LIMB = "#5FC8FF", INK = "#DCE9FF", DIM = "#8FA6D8";
+const RAD = Math.PI / 180;
+
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let W = 0, H = 0, R = 0, cx = 0, cy = 0;
+let land = [], stars = [], links = [], spin = 64, last = 0;
+
+function decodeLand() {
+  const bin = atob(BM);
+  const pts = [];
+  for (let r = 0; r < ROWS; r++) {
+    const lat = P0 + r * STEP;
+    const stride = Math.max(1, Math.round(1 / Math.max(0.18, Math.cos(lat * RAD))));
+    for (let c = 0; c < COLS; c += stride) {
+      const i = r * COLS + c;
+      if (bin.charCodeAt(i >> 3) & (1 << (i & 7))) pts.push([L0 + c * STEP, lat]);
+    }
+  }
+  return pts;
+}
+
+function greatCircle(a, b, n) {
+  const toVec = p => {
+    const l = p[0] * RAD, t = p[1] * RAD, ct = Math.cos(t);
+    return [ct * Math.cos(l), ct * Math.sin(l), Math.sin(t)];
+  };
+  const v1 = toVec(a), v2 = toVec(b);
+  const dot = Math.max(-1, Math.min(1, v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]));
+  const om = Math.acos(dot), so = Math.sin(om) || 1e-6;
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const f = i / n, s1 = Math.sin((1 - f) * om) / so, s2 = Math.sin(f * om) / so;
+    const x = s1*v1[0] + s2*v2[0], y = s1*v1[1] + s2*v2[1], z = s1*v1[2] + s2*v2[2];
+    out.push([Math.atan2(y, x) / RAD, Math.asin(Math.max(-1, Math.min(1, z))) / RAD]);
+  }
+  return out;
+}
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  R = W < 620 ? Math.min(W * 0.34, H * 0.36) : Math.min(W * 0.30, H * 0.38);
+  cx = W / 2; cy = H / 2;
+  stars = [];
+  const n = Math.round((W * H) / 5200);
+  for (let i = 0; i < n; i++) stars.push({
+    x: Math.random() * W, y: Math.random() * H,
+    r: Math.random() * 1.1 + 0.25, a: Math.random() * 0.5 + 0.12,
+    t: Math.random() * Math.PI * 2
+  });
+}
+
+// orthographic projection state, refreshed each frame
+let sinP0 = 0, cosP0 = 1, lam0 = 0;
+
+function setRotation(spinDeg, tiltDeg) {
+  lam0 = -spinDeg * RAD;
+  const p = tiltDeg * RAD;
+  sinP0 = Math.sin(p); cosP0 = Math.cos(p);
+}
+
+function project(lon, lat) {
+  const l = lon * RAD - lam0, p = lat * RAD;
+  const cp = Math.cos(p), sp = Math.sin(p), cl = Math.cos(l);
+  const cosC = sinP0 * sp + cosP0 * cp * cl;
+  return [cx + R * cp * Math.sin(l), cy - R * (cosP0 * sp - sinP0 * cp * cl), cosC];
+}
+
+function strokePath(coords, style, width) {
+  ctx.beginPath();
+  let pen = false;
+  for (let i = 0; i < coords.length; i++) {
+    const q = project(coords[i][0], coords[i][1]);
+    if (q[2] <= 0) { pen = false; continue; }
+    if (pen) ctx.lineTo(q[0], q[1]); else { ctx.moveTo(q[0], q[1]); pen = true; }
+  }
+  ctx.strokeStyle = style; ctx.lineWidth = width; ctx.stroke();
+}
+
+function frame(now) {
+  const dt = last ? Math.min(now - last, 60) : 16;
+  last = now;
+  if (!reduce) spin += dt * 0.0052;
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function draw() {
+  setRotation(spin, 12);
+  const t = performance.now() / 1000;
+  ctx.clearRect(0, 0, W, H);
+
+  for (const s of stars) {
+    ctx.globalAlpha = s.a * (0.6 + 0.4 * Math.sin(t * 0.7 + s.t));
+    ctx.fillStyle = "#BFE6FF";
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  const halo = ctx.createRadialGradient(cx, cy, R * 0.86, cx, cy, R * 1.5);
+  halo.addColorStop(0, "rgba(40,140,255,0.30)");
+  halo.addColorStop(0.45, "rgba(30,99,255,0.10)");
+  halo.addColorStop(1, "rgba(4,7,13,0)");
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, R * 1.5, 0, 6.283); ctx.fill();
+
+  const body = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.35, R * 0.1, cx, cy, R);
+  body.addColorStop(0, "rgba(16,44,86,0.95)");
+  body.addColorStop(1, "rgba(6,14,32,0.98)");
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283); ctx.fill();
+
+  for (let lon = -180; lon < 180; lon += 15) {
+    const arc = [];
+    for (let lat = -80; lat <= 80; lat += 5) arc.push([lon, lat]);
+    strokePath(arc, "rgba(120,175,255,0.12)", 0.7);
+  }
+  for (let lat = -75; lat <= 75; lat += 15) {
+    const arc = [];
+    for (let lon = -180; lon <= 180; lon += 5) arc.push([lon, lat]);
+    strokePath(arc, "rgba(120,175,255,0.12)", 0.7);
+  }
+
+  links.forEach((pts, i) => {
+    strokePath(pts, "rgba(95,200,255," + (0.10 + 0.05 * Math.sin(t * 0.5 + i)) + ")", 0.8);
+  });
+
+  ctx.fillStyle = DOT;
+  for (let i = 0; i < land.length; i++) {
+    const q = project(land[i][0], land[i][1]);
+    if (q[2] <= 0.02) continue;
+    ctx.globalAlpha = 0.28 + q[2] * 0.62;
+    const s = 0.8 + q[2] * 0.85;
+    ctx.fillRect(q[0] - s / 2, q[1] - s / 2, s, s);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283);
+  ctx.strokeStyle = LIMB; ctx.lineWidth = 1.4;
+  ctx.shadowColor = LIMB; ctx.shadowBlur = 26; ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  [[0.30, 1.22, 0.16], [-0.42, 1.34, 0.10], [0.85, 1.12, 0.12]].forEach(([tilt, k, a], i) => {
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilt + (reduce ? 0 : t * 0.04 * (i + 1)));
+    ctx.beginPath(); ctx.ellipse(0, 0, R * k, R * 0.26, 0, 0, 6.283);
+    ctx.strokeStyle = "rgba(95,200,255," + a + ")"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.restore();
+  });
+
+  const visible = [];
+  SITES.forEach(s => {
+    const q = project(s.lon, s.lat);
+    if (q[2] <= 0.06) return;
+    visible.push({ s, xy: q, vis: Math.min(1, (q[2] - 0.06) / 0.30), side: q[0] >= cx ? 1 : -1 });
+  });
+
+  const GAP = 38, PAD = 52;
+  [1, -1].forEach(side => {
+    const rows = visible.filter(v => v.side === side).sort((a, b) => a.xy[1] - b.xy[1]);
+    rows.forEach(v => { v.ly = v.xy[1]; });
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i].ly - rows[i - 1].ly < GAP) rows[i].ly = rows[i - 1].ly + GAP;
+    }
+    const over = rows.length ? rows[rows.length - 1].ly - (H - PAD) : 0;
+    if (over > 0) rows.forEach(r => { r.ly -= over; });
+    rows.forEach(r => { r.ly = Math.max(PAD, Math.min(H - PAD, r.ly)); });
+  });
+
+  visible.forEach(v => {
+    const { s, xy, vis, side } = v;
+    ctx.globalAlpha = vis;
+
+    const ph = (t * 0.42 + s.off / 140) % 1;
+    ctx.beginPath(); ctx.arc(xy[0], xy[1], 3 + ph * 20, 0, 6.283);
+    ctx.strokeStyle = "rgba(159,214,255," + (1 - ph) * 0.55 * vis + ")";
+    ctx.lineWidth = 1; ctx.stroke();
+
+    ctx.beginPath(); ctx.arc(xy[0], xy[1], 3, 0, 6.283);
+    ctx.fillStyle = "#CFE8FF"; ctx.shadowColor = LIMB; ctx.shadowBlur = 12; ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // narrow frames can't fit leader tags; the strip below the map names them
+    if (W < 620) { ctx.globalAlpha = 1; return; }
+
+    const railX = side > 0 ? W - 172 : 172;
+    const elbowX = side > 0 ? Math.max(xy[0] + 20, cx + R * 0.72) : Math.min(xy[0] - 20, cx - R * 0.72);
+
+    ctx.beginPath();
+    ctx.moveTo(xy[0] + side * 7, xy[1]);
+    ctx.lineTo(elbowX, xy[1]);
+    ctx.lineTo(railX, v.ly);
+    ctx.lineTo(railX + side * 16, v.ly);
+    ctx.strokeStyle = "rgba(95,200,255," + 0.8 * vis + ")"; ctx.lineWidth = 1; ctx.stroke();
+
+    ctx.beginPath(); ctx.arc(railX, v.ly, 2, 0, 6.283);
+    ctx.fillStyle = LIMB; ctx.fill();
+
+    ctx.textAlign = side > 0 ? "left" : "right";
+    const tx = railX + side * 25;
+    ctx.font = '500 11px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = INK;
+    ctx.fillText(s.name, tx, v.ly - 3);
+    ctx.font = '400 8.5px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = DIM;
+    ctx.fillText(s.code + " · " + Math.abs(s.lat).toFixed(2) + "°N " + Math.abs(s.lon).toFixed(2) + "°W", tx, v.ly + 10);
+    ctx.globalAlpha = 1;
+  });
+
+  const m = 16, L = 15;
+  ctx.strokeStyle = "rgba(127,182,255,0.85)"; ctx.lineWidth = 1;
+  [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]].forEach(([bx, by, sx, sy]) => {
+    ctx.beginPath();
+    ctx.moveTo(bx + sx * L, by); ctx.lineTo(bx, by); ctx.lineTo(bx, by + sy * L);
+    ctx.stroke();
+  });
+
+  ctx.font = '400 9px "JetBrains Mono", ui-monospace, monospace';
+  ctx.fillStyle = DIM; ctx.textAlign = "left";
+  ctx.fillText(W < 620 ? "NATURAL EARTH 1:110M" : "ORTHOGRAPHIC · NATURAL EARTH 1:110M", 24, H - 20);
+  ctx.textAlign = "right";
+  ctx.fillText("04 SITES · ACTIVE", W - 24, 28);
+}
+
+resize();
+land = decodeLand();
+for (let i = 0; i < HUBS.length; i++) {
+  for (let j = i + 1; j < HUBS.length; j++) {
+    if ((i * 7 + j * 3) % 4 === 0) links.push(greatCircle(HUBS[i], HUBS[j], 28));
+  }
+}
+requestAnimationFrame(frame);
+
+let rt;
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(resize, 200); });
+</script>
+</body>
+</html>

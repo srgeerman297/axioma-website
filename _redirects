@@ -1,0 +1,17 @@
+# Old WordPress URLs -> new pages.
+# /about, /solutions, /courses, /faq, /contact, /case-studies, /risk-management
+# and /privacy-statement resolve automatically (Pages serves the matching .html).
+
+/about-team            /about.html                        301
+/compliance-services   /compliance.html                   301
+/audit-services        /audit.html                        301
+/fintech-services      /fintech.html                      301
+/case-studies-overview /case-studies.html                 301
+/contact-3             /contact.html                      301
+/axioma-and-ect        /courses.html#ect                  301
+
+/portfolio/artificial-intelligence  /case-artificial-intelligence.html  301
+/portfolio/*           /case-studies.html                 301
+
+# Images still live in the old WordPress install; send requests there.
+/wp-content/*          https://69700.us8.myftpupload.com/wp-content/:splat  301
