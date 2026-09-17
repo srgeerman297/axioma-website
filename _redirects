@@ -13,5 +13,22 @@
 /portfolio/artificial-intelligence  /case-artificial-intelligence.html  301
 /portfolio/*           /case-studies.html                 301
 
+# Nav links inside the built pages use the source filenames; map them to the
+# deployed pages.
+/Axioma%20Home.dc.html            /index.html                         301
+/Axioma%20About.dc.html           /about.html                         301
+/Axioma%20Name.dc.html            /name.html                          301
+/Axioma%20Compliance.dc.html      /compliance.html                    301
+/Axioma%20Risk%20Management.dc.html /risk-management.html             301
+/Axioma%20Audit.dc.html           /audit.html                         301
+/Axioma%20Fintech.dc.html         /fintech.html                       301
+/Axioma%20Solutions.dc.html       /solutions.html                     301
+/Axioma%20Courses.dc.html         /courses.html                       301
+/Axioma%20Case%20Studies.dc.html  /case-studies.html                  301
+/Axioma%20Case%20Study%20AI.dc.html /case-artificial-intelligence.html 301
+/Axioma%20FAQ.dc.html             /faq.html                           301
+/Axioma%20Contact.dc.html         /contact.html                       301
+/Axioma%20Privacy.dc.html         /privacy-statement.html             301
+
 # Images still live in the old WordPress install; send requests there.
 /wp-content/*          https://69700.us8.myftpupload.com/wp-content/:splat  301
