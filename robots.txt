@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://axioma-corp.com/sitemap.xml
